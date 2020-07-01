@@ -12,7 +12,7 @@ class Fetcher
         def Time.now_in_jst
           prev_tz = ENV['TZ']
           ENV['TZ'] = 'JST'
-          self.now.tap do
+          self.now.localtime.tap do
             ENV['TZ'] = prev_tz
           end
         end
