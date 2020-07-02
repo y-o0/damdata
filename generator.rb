@@ -1,5 +1,6 @@
 require 'pathname'
 require 'time'
+require_relative './aggregator'
 
 class Generator
   class << self
@@ -7,6 +8,7 @@ class Generator
       File.read(File.expand_path('../templates/index.html', __FILE__))
           .gsub('<!--  snapshots here  -->', snapshot_links)
           .gsub('<!--  jsons here  -->', json_links)
+          .gsub('FORMATTED_JSON', Aggregator.convert)
           .then do |replaced_content|
         File.open(File.expand_path('../index.html', __FILE__), 'w') do |writer|
           writer << replaced_content

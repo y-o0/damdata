@@ -3,17 +3,85 @@
 <head>
     <meta charset="utf-8"/>
     <title>damdata</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js"></script>
+    <script>
+        var data = FORMATTED_JSON;
+        var selectedPoint = '三峡水库';
+        var selectedCriteria = 'z';
+
+        function renderChart(point, criteria) {
+            var particle = Object.keys(data[point]).map(function (key) {
+                return {x: key, y: data[point][key][criteria]};
+            });
+            var ctx = document.getElementById('chart').getContext('2d');
+            ctx.height = 400;
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: particle.map(function (r) {
+                        return new Date(parseInt(r.x));
+                    }),
+                    datasets: [{
+                        label: criteria + '@' + point,
+                        data: particle,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        yAxes: [{
+                            ticks: {
+                                beginAtZero: false
+                            }
+                        }]
+                    }
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            Object.keys(data).forEach(function (key) {
+                var newButton = document.createElement('button');
+                var txt = document.createTextNode(key);
+                newButton.addEventListener('click', function (_) {
+                    selectedPoint = key;
+                    renderChart(key, selectedCriteria);
+                });
+                newButton.appendChild(txt);
+                document.getElementById('pointButtons').appendChild(newButton)
+            });
+            var criterion = {oq: '流出', q: '流入', z: '水位'};
+            Object.keys(criterion).forEach(function (key) {
+                var newButton = document.createElement('button');
+                var txt = document.createTextNode(criterion[key]);
+                newButton.addEventListener('click', function (_) {
+                    renderChart(selectedPoint, key);
+                });
+                newButton.appendChild(txt);
+                document.getElementById('criteriaButtons').appendChild(newButton)
+
+            });
+            renderChart(selectedPoint, selectedCriteria);
+        });
+    </script>
 </head>
 <body>
+<div style="height: 400px">
+    <canvas id="chart" height="400"></canvas>
+</div>
+<div id="pointButtons"></div>
+<div id="criteriaButtons"></div>
 <section>
-    <h1>snapshot</h1>
+    <h1>snapshot(UTC)</h1>
     <ul>
         <!--  snapshots here  -->
     </ul>
 </section>
 
 <section>
-    <h2>json</h2>
+    <h2>json(UTC)</h2>
     <ul>
         <!--  jsons here  -->
     </ul>
