@@ -6,75 +6,125 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js"></script>
     <script>
         var data = FORMATTED_JSON;
-        var selectedPoint = '三峡水库';
-        var selectedCriteria = 'z';
+        var selectedPoint = "三峡水库";
         var chart = null;
 
-        function renderChart(point, criteria) {
+        function formatDate(date) {
+            return (
+                date.getFullYear() +
+                "/" +
+                ("0" + (date.getMonth() + 1)).slice(-2) +
+                "/" +
+                ("0" + date.getDate()).slice(-2) +
+                " " +
+                ("0" + date.getHours()).slice(-2) +
+                ":" +
+                ("0" + date.getMinutes()).slice(-2)
+            );
+        }
+
+        function renderChart(point) {
             if (chart) {
                 chart.destroy();
             }
-            var particle = Object.keys(data[point]).map(function (key) {
-                return {x: key, y: data[point][key][criteria]};
-            });
-            var ctx = document.getElementById('chart').getContext('2d');
+            var particle = function (criteria) {
+                return Object.keys(data[point]).map(function (key) {
+                    return {
+                        x: key,
+                        y: data[point][key][criteria] == 0 ? null : data[point][key][criteria],
+                    };
+                });
+            };
+            var ctx = document.getElementById("chart").getContext("2d");
             ctx.height = 400;
             chart = new Chart(ctx, {
-                type: 'line',
+                type: "bar",
                 data: {
-                    labels: particle.map(function (r) {
-                        return new Date(parseInt(r.x));
+                    labels: particle("z").map(function (r) {
+                        return formatDate(new Date(parseInt(r.x)));
                     }),
-                    datasets: [{
-                        label: criteria + '@' + point,
-                        data: particle,
-                        borderWidth: 1
-                    }]
+                    datasets: [
+                        {
+                            type: "line",
+                            label: "水位@" + point,
+                            spanGaps: true,
+                            fill: false,
+                            data: particle("z").map(function (r) {
+                                return r.y;
+                            }),
+                            yAxisID: "z",
+                            borderWidth: 1,
+                            borderColor: "rgba(0,113,233,0.8)",
+                        },
+                        {
+                            label: "流入@" + point,
+                            spanGaps: true,
+                            yAxisID: "q",
+                            data: particle("q").map(function (r) {
+                                return r.y;
+                            }),
+                            borderWidth: 1,
+                            borderColor: "rgba(233,36,75,0.8)",
+                            backgroundColor: "rgba(233,36,75,0.35)",
+                            hoverBackgroundColor: "rgba(233,36,75)",
+                        },
+                        {
+                            label: "流出@" + point,
+                            spanGaps: true,
+                            yAxisID: "q",
+                            data: particle("oq").map(function (r) {
+                                return r.y;
+                            }),
+                            borderWidth: 1,
+                            borderColor: "rgba(70,233,101,0.8)",
+                            backgroundColor: "rgba(70,233,101,0.35)",
+                            hoverBackgroundColor: "rgba(70,233,101)",
+                        },
+                    ],
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     scales: {
-                        yAxes: [{
-                            ticks: {
-                                beginAtZero: false
-                            }
-                        }],
-            xAxes: [{
-            		ticks: {
-                	reverse: true,
-                  beginAtZero: false
-                }
-            }]
-                    }
-                }
+                        yAxes: [
+                            {
+                                id: "z",
+                                ticks: {
+                                    beginAtZero: false,
+                                },
+                            },
+                            {
+                                id: "q",
+                                position: "right",
+                            },
+                        ],
+                        xAxes: [
+                            {
+                                ticks: {
+                                    reverse: true,
+                                    beginAtZero: false,
+                                },
+                            },
+                        ],
+                    },
+                },
             });
         }
 
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener("DOMContentLoaded", function () {
             Object.keys(data).forEach(function (key) {
-                var newButton = document.createElement('button');
+                var newButton = document.createElement("button");
                 var txt = document.createTextNode(key);
-                newButton.addEventListener('click', function (_) {
+                newButton.addEventListener("click", function (_) {
                     selectedPoint = key;
-                    renderChart(key, selectedCriteria);
+                    renderChart(key);
                 });
                 newButton.appendChild(txt);
-                document.getElementById('pointButtons').appendChild(newButton)
+                document.getElementById("pointButtons").appendChild(newButton);
             });
-            var criterion = {oq: '流出', q: '流入', z: '水位'};
-            Object.keys(criterion).forEach(function (key) {
-                var newButton = document.createElement('button');
-                var txt = document.createTextNode(criterion[key]);
-                newButton.addEventListener('click', function (_) {
-                    renderChart(selectedPoint, key);
-                });
-                newButton.appendChild(txt);
-                document.getElementById('criteriaButtons').appendChild(newButton)
-
-            });
-            renderChart(selectedPoint, selectedCriteria);
+            renderChart(selectedPoint);
         });
+
     </script>
 </head>
 <body>
@@ -83,7 +133,9 @@
     <canvas id="chart" height="400"></canvas>
 </div>
 <div id="pointButtons"></div>
-<div id="criteriaButtons"></div>
+<div style="display: flex;justify-content:center;">
+<img src="./images/ichi.png" style="max-width: 80%;" />
+</div>
 <section>
     <h1>snapshot(UTC)</h1>
     <ul>
