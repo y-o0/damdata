@@ -8,14 +8,18 @@
         var data = FORMATTED_JSON;
         var selectedPoint = '三峡水库';
         var selectedCriteria = 'z';
+        var chart = null;
 
         function renderChart(point, criteria) {
+            if (chart) {
+                chart.destroy();
+            }
             var particle = Object.keys(data[point]).map(function (key) {
                 return {x: key, y: data[point][key][criteria]};
             });
             var ctx = document.getElementById('chart').getContext('2d');
             ctx.height = 400;
-            new Chart(ctx, {
+            chart = new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: particle.map(function (r) {
