@@ -62,7 +62,6 @@
             };
 
             var ctx = document.getElementById("chart" + (cidx + 1)).getContext("2d");
-            ctx.height = 200;
             charts[cidx] = new Chart(ctx, {
                 type: "scatter",
                 data: {
@@ -108,7 +107,8 @@
                         fontSize: 18
                     },
                     responsive: true,
-                    maintainAspectRatio: false,
+                    maintainAspectRatio: true,
+                    aspectRatio: 3,
                     scales: {
                         yAxes: [
                             {
@@ -166,8 +166,6 @@
         document.addEventListener("DOMContentLoaded", function () {
             charts = Array(orderedKeys.length);
             orderedKeys.forEach(function (key, idx) {
-                var div = document.createElement("div");
-                div.setAttribute("style", "display: inline-block;");
                 var check = document.createElement("input");
                 check.setAttribute('type', 'checkbox');
                 check.setAttribute('name', key);
@@ -181,7 +179,6 @@
                 var lbl = document.createElement('label');
                 lbl.setAttribute('for', 'cbx' + idx);
                 var txt = document.createTextNode(key);
-                lbl.appendChild(txt);
 
                 check.addEventListener("click", function (e) {
                     var cidx = orderedKeys.indexOf(key);
@@ -193,86 +190,124 @@
                         div.style.display = "none";
                     }
                 });
-                div.appendChild(check);
-                div.appendChild(lbl);
-                document.getElementById("pointButtons").appendChild(div);
+                lbl.appendChild(check);
+                lbl.appendChild(txt);
+                document.getElementById("pointButtons").appendChild(lbl);
             });
         });
-
     </script>
+    <style>
+        html, body {
+            width: 100%;
+            margin: unset;
+            padding: unset;
+        }
+
+        #wrapper {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 10px;
+        }
+
+        #chartsContainer {
+            width: 100%;
+        }
+
+        #chartsContainer > div {
+            margin: 0 auto 30px auto;
+            min-width: 600px;
+            max-width: 900px;
+        }
+
+        #pointButtons {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        #pointButtons > label {
+            margin-right: 1em;
+            line-height: 2;
+            font-size: 1.2em;
+        }
+    </style>
 </head>
 <body>
-<p><a href="https://github.com/y-o0/damdata">Contributions are welcome. View this on github</a></p>
-<div id="pointButtons"></div>
-<div id="chartsContainer">
-    <div style="height: 200px">
-        <canvas id="chart1" height="200"></canvas>
+<div id="wrapper">
+    <p><a href="https://github.com/y-o0/damdata">Contributions are welcome. View this on github</a></p>
+    <div id="pointButtons"></div>
+    <div id="chartsContainer">
+        <div>
+            <canvas id="chart1"></canvas>
+        </div>
+        <div>
+            <canvas id="chart2"></canvas>
+        </div>
+        <div>
+            <canvas id="chart3"></canvas>
+        </div>
+        <div>
+            <canvas id="chart4"></canvas>
+        </div>
+        <div>
+            <canvas id="chart5"></canvas>
+        </div>
+        <div>
+            <canvas id="chart6"></canvas>
+        </div>
+        <div>
+            <canvas id="chart7"></canvas>
+        </div>
+        <div>
+            <canvas id="chart8"></canvas>
+        </div>
+        <div>
+            <canvas id="chart9"></canvas>
+        </div>
+        <div>
+            <canvas id="chart10"></canvas>
+        </div>
+        <div>
+            <canvas id="chart11"></canvas>
+        </div>
+        <div>
+            <canvas id="chart12"></canvas>
+        </div>
+        <div>
+            <canvas id="chart13"></canvas>
+        </div>
+        <div>
+            <canvas id="chart14"></canvas>
+        </div>
     </div>
-    <div style="height: 200px">
-        <canvas id="chart2" height="200"></canvas>
-    </div>
-    <div style="height: 200px">
-        <canvas id="chart3" height="200"></canvas>
-    </div>
-    <div style="height: 200px">
-        <canvas id="chart4" height="200"></canvas>
-    </div>
-    <div style="height: 200px">
-        <canvas id="chart5" height="200"></canvas>
-    </div>
-    <div style="height: 200px">
-        <canvas id="chart6" height="200"></canvas>
-    </div>
-    <div style="height: 200px">
-        <canvas id="chart7" height="200"></canvas>
-    </div>
-    <div style="height: 200px">
-        <canvas id="chart8" height="200"></canvas>
-    </div>
-    <div style="height: 200px">
-        <canvas id="chart9" height="200"></canvas>
-    </div>
-    <div style="height: 200px">
-        <canvas id="chart10" height="200"></canvas>
-    </div>
-    <div style="height: 200px">
-        <canvas id="chart11" height="200"></canvas>
-    </div>
-    <div style="height: 200px">
-        <canvas id="chart12" height="200"></canvas>
-    </div>
-    <div style="height: 200px">
-        <canvas id="chart13" height="200"></canvas>
-    </div>
-    <div style="height: 200px">
-        <canvas id="chart14" height="200"></canvas>
-    </div>
-</div>
 
-<section>
-    <h1>位置関係</h1>
-    <div class="map-link-container">
-        <p><a href="https://i.imgur.com/lIzelQK.jpg" target="_blank" rel="noopener">他の各観測地点の位置関係地図はこちら（外部リンク）</a></p>
-        <p>※地図のライセンスが不明なためリンクにて紹介</p>
-    </div>
-    <div style="display:flex;flex-direction:column;justify-content:center;align-items:center;">
-        <p style="text-align:center;"><a href="https://egg.5ch.net/test/read.cgi/river/1593854846/118" target="_blank"
-                                         rel="noopener">三峡ダムスレ★25 >>118氏</a>提供</p>
-        <img src="./images/damthread-25-118-resized.jpg" style="max-width: 80%;"/>
-    </div>
-</section>
-<section>
-    <h1>周辺の天気</h1>
-    <div style="display:flex;justify-content:center;">
-        <iframe width="800" height="500"
-                src="https://embed.windy.com/embed2.html?lat=30.145&lon=107.094&detailLat=35.688&detailLon=139.753&width=800&height=500&zoom=5&level=surface&overlay=rain&product=ecmwf&menu=&message=true&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1"
-                frameborder="0"></iframe>
-    </div>
-</section>
-<section>
-    <h1>snapshot(UTC)</h1>
-    <ul>
-        <li><a href="./snapshots/2020-07-05-110502.html">取得日 2020年2020年07月05日 11:05分</a></li>
+    <section>
+        <h1>位置関係</h1>
+        <div class="map-link-container">
+            <p><a href="https://i.imgur.com/lIzelQK.jpg" target="_blank" rel="noopener">他の各観測地点の位置関係地図はこちら（外部リンク）</a>
+            </p>
+            <p>※地図のライセンスが不明なためリンクにて紹介</p>
+        </div>
+        <div style="display:flex;flex-direction:column;justify-content:center;align-items:center;">
+            <p style="text-align:center;"><a href="https://egg.5ch.net/test/read.cgi/river/1593854846/118"
+                                             target="_blank"
+                                             rel="noopener">三峡ダムスレ★25 >>118氏</a>提供</p>
+            <img src="./images/damthread-25-118-resized.jpg" style="max-width: 80%;"/>
+        </div>
+    </section>
+    <section>
+        <h1>周辺の天気</h1>
+        <div style="display:flex;justify-content:center;">
+            <iframe width="800" height="500"
+                    src="https://embed.windy.com/embed2.html?lat=30.145&lon=107.094&detailLat=35.688&detailLon=139.753&width=800&height=500&zoom=5&level=surface&overlay=rain&product=ecmwf&menu=&message=true&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1"
+                    frameborder="0"></iframe>
+        </div>
+    </section>
+    <section>
+        <h1>snapshot(UTC)</h1>
+        <ul>
+            <li><a href="./snapshots/2020-07-05-110502.html">取得日 2020年2020年07月05日 11:05分</a></li>
 <li><a href="./snapshots/2020-07-05-100502.html">取得日 2020年2020年07月05日 10:05分</a></li>
 <li><a href="./snapshots/2020-07-05-090502.html">取得日 2020年2020年07月05日 09:05分</a></li>
 <li><a href="./snapshots/2020-07-05-080502.html">取得日 2020年2020年07月05日 08:05分</a></li>
@@ -366,13 +401,13 @@
 <li><a href="./snapshots/2020-07-01-160501.html">取得日 2020年2020年07月01日 16:05分</a></li>
 <li><a href="./snapshots/2020-07-01-150502.html">取得日 2020年2020年07月01日 15:05分</a></li>
 <li><a href="./snapshots/2020-07-01-140502.html">取得日 2020年2020年07月01日 14:05分</a></li>
-    </ul>
-</section>
+        </ul>
+    </section>
 
-<section>
-    <h2>json(UTC)</h2>
-    <ul>
-        <li><a href="./jsons/2020-07-05-110502.json">取得日 2020年2020年07月05日 11:05分</a></li>
+    <section>
+        <h2>json(UTC)</h2>
+        <ul>
+            <li><a href="./jsons/2020-07-05-110502.json">取得日 2020年2020年07月05日 11:05分</a></li>
 <li><a href="./jsons/2020-07-05-100502.json">取得日 2020年2020年07月05日 10:05分</a></li>
 <li><a href="./jsons/2020-07-05-090502.json">取得日 2020年2020年07月05日 09:05分</a></li>
 <li><a href="./jsons/2020-07-05-080502.json">取得日 2020年2020年07月05日 08:05分</a></li>
@@ -466,8 +501,9 @@
 <li><a href="./jsons/2020-07-01-160501.json">取得日 2020年2020年07月01日 16:05分</a></li>
 <li><a href="./jsons/2020-07-01-150502.json">取得日 2020年2020年07月01日 15:05分</a></li>
 <li><a href="./jsons/2020-07-01-140502.json">取得日 2020年2020年07月01日 14:05分</a></li>
-    </ul>
-</section>
+        </ul>
+    </section>
+</div>
 </body>
 </html>
 
