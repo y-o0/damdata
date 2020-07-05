@@ -8,10 +8,11 @@ class Aggregator
       Dir.glob(File.expand_path('../../jsons/*.json', __FILE__)).sort.reverse[0..14 * 24].reduce(Hash.new) do |acc, cur|
         JSON.load(File.read(cur)).each do |r|
           acc[r['stnm']] ||= Hash.new
-          acc[r['stnm']][r['tm']] = r
+          acc[r['stnm']][r['tm']] = { z: r['z'].to_f, q: r['q'].to_i, oq: r['oq'].to_i }
         end
         acc
       end.to_json
     end
   end
 end
+
