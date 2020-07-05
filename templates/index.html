@@ -6,16 +6,34 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js"></script>
     <script>
         var data = FORMATTED_JSON;
-        var selectedPoint = "三峡水库";
-        var chart = null;
+        var charts = null;
+        var orderedKeys = ['寸滩', '武隆', '三峡水库', '茅坪(二)', '宜昌', '沙市', '城陵矶(莲)', '城陵矶(七)', '丹江口水库', '龙王庙', '汉口', '九江', '湖口', '大通'];
+        var initiallyShownPointKeys = ['寸滩', '三峡水库', '宜昌', '汉口', '大通'];
+
+        function getMinMax(o) {
+            var minmax = Object.keys(o).map(function (key) {
+                var d = Object.keys(o[key]).map(Number);
+                return {
+                    min: Math.min.apply(null, d),
+                    max: Math.max.apply(null, d)
+                }
+            });
+            return minmax.reduce(function (r, d) {
+                return {
+                    min: Math.min(r.min, d.min),
+                    max: Math.max(r.max, d.max)
+                };
+            });
+        }
+
+        var tmnmx = getMinMax(data);
 
         function formatDate(date) {
             return (
-                date.getFullYear() +
+                "" +
+                (date.getMonth() + 1) +
                 "/" +
-                ("0" + (date.getMonth() + 1)).slice(-2) +
-                "/" +
-                ("0" + date.getDate()).slice(-2) +
+                date.getDate() +
                 " " +
                 ("0" + date.getHours()).slice(-2) +
                 ":" +
@@ -24,65 +42,71 @@
         }
 
         function renderChart(point) {
-            if (chart) {
-                chart.destroy();
+
+            var cidx = orderedKeys.indexOf(point);
+            if (cidx != undefined) {
+                if (charts[cidx]) {
+                    charts[cidx].destroy();
+                }
             }
+
             var particle = function (criteria) {
                 return Object.keys(data[point]).map(function (key) {
                     return {
                         x: key,
-                        y: data[point][key][criteria] == 0 ? null : data[point][key][criteria],
+                        y: data[point][key][criteria]
                     };
+                }).filter(function (r) {
+                    return r.y != 0;
                 });
             };
-            var ctx = document.getElementById("chart").getContext("2d");
-            ctx.height = 400;
-            chart = new Chart(ctx, {
-                type: "bar",
+
+            var ctx = document.getElementById("chart" + (cidx + 1)).getContext("2d");
+            ctx.height = 200;
+            charts[cidx] = new Chart(ctx, {
+                type: "scatter",
                 data: {
-                    labels: particle("z").map(function (r) {
-                        return formatDate(new Date(parseInt(r.x)));
-                    }),
                     datasets: [
                         {
-                            type: "line",
-                            label: "水位@" + point,
-                            spanGaps: true,
+                            label: "水位",
                             fill: false,
-                            data: particle("z").map(function (r) {
-                                return r.y;
-                            }),
+                            data: particle("z"),
                             yAxisID: "z",
-                            borderWidth: 1,
+                            borderWidth: 2,
                             borderColor: "rgba(0,113,233,0.8)",
+                            backgroundColor: "rgba(0,113,233,0.8)",
+                            showLine: true,
                         },
                         {
-                            label: "流入@" + point,
-                            spanGaps: true,
+                            label: "流入",
+                            fill: false,
                             yAxisID: "q",
-                            data: particle("q").map(function (r) {
-                                return r.y;
-                            }),
-                            borderWidth: 1,
+                            data: particle("q"),
+                            borderWidth: 2,
                             borderColor: "rgba(233,36,75,0.8)",
                             backgroundColor: "rgba(233,36,75,0.35)",
                             hoverBackgroundColor: "rgba(233,36,75)",
+                            showLine: true,
                         },
                         {
-                            label: "流出@" + point,
-                            spanGaps: true,
+                            label: "流出",
+                            fill: true,
                             yAxisID: "q",
-                            data: particle("oq").map(function (r) {
-                                return r.y;
-                            }),
-                            borderWidth: 1,
+                            data: particle("oq"),
+                            borderWidth: 2,
                             borderColor: "rgba(70,233,101,0.8)",
                             backgroundColor: "rgba(70,233,101,0.35)",
                             hoverBackgroundColor: "rgba(70,233,101)",
+                            showLine: true,
                         },
                     ],
                 },
                 options: {
+                    title: {
+                        display: true,
+                        text: point,
+                        fontSize: 18
+                    },
                     responsive: true,
                     maintainAspectRatio: false,
                     scales: {
@@ -91,60 +115,160 @@
                                 id: "z",
                                 ticks: {
                                     beginAtZero: false,
+                                    fontColor: 'blue',
                                 },
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: '水位[m]',
+                                }
                             },
                             {
                                 id: "q",
                                 position: "right",
+                                scaleLabel: {
+                                    display: true,
+                                    labelString: '流量[m^3/s]',
+                                }
+
                             },
                         ],
                         xAxes: [
                             {
                                 ticks: {
-                                    reverse: true,
                                     beginAtZero: false,
+                                    suggestedMax: tmnmx.max,
+                                    suggestedMin: tmnmx.min,
+                                    callback: function (value, index, values) {
+                                        return formatDate(new Date(value));
+                                    }
                                 },
                             },
                         ],
                     },
+                    tooltips: {
+                        callbacks: {
+                            title: function (t, data) {
+                                return formatDate(new Date(t[0].xLabel));
+                            },
+                            label: function (t, data) {
+                                var label = data.datasets[t.datasetIndex].label || '';
+                                if (label) {
+                                    label += ":" + t.yLabel;
+                                }
+                                return label;
+                            }
+                        }
+                    }
                 },
             });
         }
 
         document.addEventListener("DOMContentLoaded", function () {
-            Object.keys(data).forEach(function (key) {
-                var newButton = document.createElement("button");
-                var txt = document.createTextNode(key);
-                newButton.addEventListener("click", function (_) {
-                    selectedPoint = key;
+            charts = Array(orderedKeys.length);
+            orderedKeys.forEach(function (key, idx) {
+                var div = document.createElement("div");
+                div.setAttribute("style", "display: inline-block;");
+                var check = document.createElement("input");
+                check.setAttribute('type', 'checkbox');
+                check.setAttribute('name', key);
+                if (initiallyShownPointKeys.includes(key)) {
+                    check.setAttribute('checked', 'checked');
                     renderChart(key);
+                } else {
+                    document.getElementById("chart" + (idx + 1)).parentElement.style.display = 'none';
+                }
+                check.setAttribute('id', 'cbx' + idx);
+                var lbl = document.createElement('label');
+                lbl.setAttribute('for', 'cbx' + idx);
+                var txt = document.createTextNode(key);
+                lbl.appendChild(txt);
+
+                check.addEventListener("click", function (e) {
+                    var cidx = orderedKeys.indexOf(key);
+                    var div = document.getElementById("chart" + (cidx + 1)).parentElement;
+                    if (e.target.checked) {
+                        div.style.display = "block";
+                        renderChart(key);
+                    } else {
+                        div.style.display = "none";
+                    }
                 });
-                newButton.appendChild(txt);
-                document.getElementById("pointButtons").appendChild(newButton);
+                div.appendChild(check);
+                div.appendChild(lbl);
+                document.getElementById("pointButtons").appendChild(div);
             });
-            renderChart(selectedPoint);
         });
 
     </script>
 </head>
 <body>
 <p><a href="https://github.com/y-o0/damdata">Contributions are welcome. View this on github</a></p>
-<div style="height: 400px">
-    <canvas id="chart" height="400"></canvas>
-</div>
 <div id="pointButtons"></div>
-<div class="map-link-container">
-  <p><a href="https://i.imgur.com/lIzelQK.jpg" target="_blank" rel="noopener">他の各観測地点の位置関係地図はこちら（外部リンク）</a></p>
-  <p>※地図のライセンスが不明なためリンクにて紹介</p>
+<div id="chartsContainer">
+    <div style="height: 200px">
+        <canvas id="chart1" height="200"></canvas>
+    </div>
+    <div style="height: 200px">
+        <canvas id="chart2" height="200"></canvas>
+    </div>
+    <div style="height: 200px">
+        <canvas id="chart3" height="200"></canvas>
+    </div>
+    <div style="height: 200px">
+        <canvas id="chart4" height="200"></canvas>
+    </div>
+    <div style="height: 200px">
+        <canvas id="chart5" height="200"></canvas>
+    </div>
+    <div style="height: 200px">
+        <canvas id="chart6" height="200"></canvas>
+    </div>
+    <div style="height: 200px">
+        <canvas id="chart7" height="200"></canvas>
+    </div>
+    <div style="height: 200px">
+        <canvas id="chart8" height="200"></canvas>
+    </div>
+    <div style="height: 200px">
+        <canvas id="chart9" height="200"></canvas>
+    </div>
+    <div style="height: 200px">
+        <canvas id="chart10" height="200"></canvas>
+    </div>
+    <div style="height: 200px">
+        <canvas id="chart11" height="200"></canvas>
+    </div>
+    <div style="height: 200px">
+        <canvas id="chart12" height="200"></canvas>
+    </div>
+    <div style="height: 200px">
+        <canvas id="chart13" height="200"></canvas>
+    </div>
+    <div style="height: 200px">
+        <canvas id="chart14" height="200"></canvas>
+    </div>
 </div>
-<div style="display:flex;flex-direction:column;justify-content:center;align-items:center;">
-  <p style="text-align:center;"><a href="https://egg.5ch.net/test/read.cgi/river/1593854846/118" target="_blank" rel="noopener">三峡ダムスレ★25 >>118氏</a>提供</p>
-  <img src="./images/damthread-25-118-resized.jpg" style="max-width: 80%;" />
-</div>
-<br />
-<div style="display:flex;justify-content:center;">
-  <iframe width="800" height="500" src="https://embed.windy.com/embed2.html?lat=30.145&lon=107.094&detailLat=35.688&detailLon=139.753&width=800&height=500&zoom=5&level=surface&overlay=rain&product=ecmwf&menu=&message=true&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1" frameborder="0"></iframe>
-</div>
+
+<section>
+    <h1>位置関係</h1>
+    <div class="map-link-container">
+        <p><a href="https://i.imgur.com/lIzelQK.jpg" target="_blank" rel="noopener">他の各観測地点の位置関係地図はこちら（外部リンク）</a></p>
+        <p>※地図のライセンスが不明なためリンクにて紹介</p>
+    </div>
+    <div style="display:flex;flex-direction:column;justify-content:center;align-items:center;">
+        <p style="text-align:center;"><a href="https://egg.5ch.net/test/read.cgi/river/1593854846/118" target="_blank"
+                                         rel="noopener">三峡ダムスレ★25 >>118氏</a>提供</p>
+        <img src="./images/damthread-25-118-resized.jpg" style="max-width: 80%;"/>
+    </div>
+</section>
+<section>
+    <h1>周辺の天気</h1>
+    <div style="display:flex;justify-content:center;">
+        <iframe width="800" height="500"
+                src="https://embed.windy.com/embed2.html?lat=30.145&lon=107.094&detailLat=35.688&detailLon=139.753&width=800&height=500&zoom=5&level=surface&overlay=rain&product=ecmwf&menu=&message=true&marker=&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1"
+                frameborder="0"></iframe>
+    </div>
+</section>
 <section>
     <h1>snapshot(UTC)</h1>
     <ul>
@@ -160,4 +284,5 @@
 </section>
 </body>
 </html>
+
 
