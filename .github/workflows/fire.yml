@@ -1,8 +1,6 @@
 name: fire!
 
 on:[push]
-#  schedule:
-#    - cron:  '5 * * * *'
 
 jobs:
   build:
