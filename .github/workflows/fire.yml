@@ -1,6 +1,6 @@
 name: fire!
 
-on:[push]
+on: [push]
 
 jobs:
   build:
