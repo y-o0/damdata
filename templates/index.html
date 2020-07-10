@@ -12,11 +12,13 @@
 
   gtag('config', 'UA-172086799-1');
 </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.27.0/moment.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-annotation/0.5.7/chartjs-plugin-annotation.min.js"></script>			
     <script>
-        var data = FORMATTED_JSON;
         var charts = null;
         var orderedKeys = ['寸滩', '武隆', '三峡水库', '茅坪(二)', '宜昌', '沙市', '城陵矶(莲)', '城陵矶(七)', '丹江口水库', '龙王庙', '汉口', '九江', '湖口', '大通'];
+		var warningLevels = [180.5, 193, 0, 0, 50.9, 43.0, 32.5, 32.5, 0, 0, 27.3, 20, 19.5, 14.4];
         var initiallyShownPointKeys = ['寸滩', '三峡水库', '宜昌', '汉口', '大通'];
 
         function getMinMax(o) {
@@ -62,7 +64,7 @@
             var particle = function (criteria) {
                 return Object.keys(data[point]).map(function (key) {
                     return {
-                        x: key,
+                        x: parseInt(key),
                         y: data[point][key][criteria]
                     };
                 }).filter(function (r) {
@@ -71,6 +73,29 @@
             };
 
             var ctx = document.getElementById("chart" + (cidx + 1)).getContext("2d");
+            var wlvl = warningLevels[orderedKeys.indexOf(point)];
+		    var graph_title = point;
+			var annots = [];
+			if(wlvl != undefined && wlvl != 0) {
+				graph_title += "(警戒水位: " + wlvl + "[m])";
+				var y = particle("z").map( function (r) { return r.y; });
+				var ymin = Math.min.apply(null, y);
+				var ymax = Math.max.apply(null, y);
+				var dy = ymax - ymin;
+			
+				if ((wlvl-ymax) < dy*0.5) {
+			        annots.push({
+				   	    type: 'line',
+						mode: 'horizontal',
+						scaleID: 'z',
+						value: wlvl.toFixed(2),
+						borderWidth: 2,
+						borderColor: 'blue',
+						borderDash: [2, 2],
+					});
+				}
+			}
+						    
             charts[cidx] = new Chart(ctx, {
                 type: "scatter",
                 data: {
@@ -112,7 +137,7 @@
                 options: {
                     title: {
                         display: true,
-                        text: point,
+                        text: graph_title,
                         fontSize: 18
                     },
                     responsive: true,
@@ -143,13 +168,20 @@
                         ],
                         xAxes: [
                             {
+							    type: 'time',
+								time: {
+								    unit: 'day',
+									displayFormats: {
+									    day: 'M/D',
+									},
+									parser: function(t) {
+									    return moment(t);
+									},
+								},
+								bounds: 'ticks',
                                 ticks: {
-                                    beginAtZero: false,
-                                    suggestedMax: tmnmx.max,
-                                    suggestedMin: tmnmx.min,
-                                    callback: function (value, index, values) {
-                                        return formatDate(new Date(value));
-                                    }
+                                    suggestedMax: moment(tmnmx.max).valueOf(),
+                                    suggestedMin: moment(tmnmx.min).valueOf(),
                                 },
                             },
                         ],
@@ -167,7 +199,8 @@
                                 return label;
                             }
                         }
-                    }
+                    },
+					annotation: { annotations: annots },
                 },
             });
         }
@@ -329,5 +362,6 @@
 </div>
 </body>
 </html>
+
 
 
