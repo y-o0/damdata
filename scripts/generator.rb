@@ -8,8 +8,8 @@ class Generator
       File.read(File.expand_path('../../templates/index.html', __FILE__))
           .gsub('<!--  snapshots here  -->', snapshot_links)
           .gsub('<!--  jsons here  -->', json_links)
-          .gsub('FORMATTED_JSON', Aggregator.convert)
           .gsub('INFO_FORMATTED_JSON', File.read(File.expand_path('../../settings/pointinfo.json', __FILE__)))
+          .gsub('FORMATTED_JSON', Aggregator.convert)
           .then do |replaced_content|
         File.open(File.expand_path('../../index.html', __FILE__), 'w') do |writer|
           writer << replaced_content
