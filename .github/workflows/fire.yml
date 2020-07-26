@@ -2,7 +2,7 @@ name: fire!
 
 on:
   schedule:
-    - cron: '15 * * * *'
+    - cron: '20 * * * *'
 
 jobs:
   build:
