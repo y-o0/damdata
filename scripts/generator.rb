@@ -24,20 +24,22 @@ class Generator
       Dir.glob(File.expand_path('../../snapshots/*.html', __FILE__)).sort.reverse.map do |path|
         basename =  Pathname(path).basename
         matched = basename.to_s.match(/(\d{4})-(\d{2})-(\d{2})-(\d{2})(\d{2})(\d{2})/)
-        "<li><a href=\"./snapshots/#{basename}\">取得日 #{matched[1]}年#{matched[1]}年#{matched[2]}月#{matched[3]}日 #{matched[4]}:#{matched[5]}分</a></li>"
-      end.join("\n")
+        next if matched[1].to_i < 2022
+        "<li><a href=\"./snapshots/#{basename}\">取得日 #{matched[1]}年#{matched[2]}月#{matched[3]}日 #{matched[4]}:#{matched[5]}分</a></li>"
+      end.compact.join("\n")
     end
 
     def json_links
       Dir.glob(File.expand_path('../../jsons/*.json', __FILE__)).sort.reverse.map do |path|
         basename =  Pathname(path).basename
         matched = basename.to_s.match(/(\d{4})-(\d{2})-(\d{2})-(\d{2})(\d{2})(\d{2})/)
+        next if matched[1].to_i < 2022
         if basename.to_s =~ /added/
-          "<li><a href=\"./jsons/#{basename}\">有志提供により追加 #{matched[1]}年#{matched[1]}年#{matched[2]}月#{matched[3]}日 #{matched[4]}:#{matched[5]}分</a></li>"
+          "<li><a href=\"./jsons/#{basename}\">有志提供により追加 #{matched[1]}年#{matched[2]}月#{matched[3]}日 #{matched[4]}:#{matched[5]}分</a></li>"
         else
-          "<li><a href=\"./jsons/#{basename}\">取得日 #{matched[1]}年#{matched[1]}年#{matched[2]}月#{matched[3]}日 #{matched[4]}:#{matched[5]}分</a></li>"
+          "<li><a href=\"./jsons/#{basename}\">取得日 #{matched[1]}年#{matched[2]}月#{matched[3]}日 #{matched[4]}:#{matched[5]}分</a></li>"
         end
-      end.join("\n")
+      end.compact.join("\n")
     end
   end
 end
