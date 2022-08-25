@@ -1,8 +1,8 @@
 name: fire!
 
 on:
-  schedule:
-    - cron: '20 * * * *'
+  schedule: push
+    # - cron: '20 * * * *'
 
 jobs:
   build:
