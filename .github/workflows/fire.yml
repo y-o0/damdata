@@ -1,7 +1,7 @@
 name: fire!
 
-on:
-  schedule: push
+on: push
+  # schedule:
     # - cron: '20 * * * *'
 
 jobs:
