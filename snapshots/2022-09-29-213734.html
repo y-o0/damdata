@@ -1,0 +1,97 @@
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml">
+
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<title>水情信息</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1, user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black">
+		<link rel="stylesheet" href="assetscjsw/styles/reset.css" />
+		<link rel="stylesheet" href="assetscjsw/styles/common.css" />
+		<link rel="stylesheet" href="assetscjsw/styles/index.css" />
+<style>
+.sssq tr{border-top: 1px solid #e7ecf1;}
+</style>
+	</head>
+
+	<body>
+<table class='sssq' width="100%" cellspacing="1" cellpadding="1">
+			<tbody id="sssqold">
+			</tbody>
+		</table>
+<script type="text/javascript" src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+		<script type="text/javascript">
+			loadSQ();
+			// 加载水情数据
+			function loadSQ() {
+				var sssq = [{"q":"10500","rvnm":"长江","stcd":"60105400","stnm":"寸滩","tm":1664485200000,"wptn":"5","z":"163.860"},{"q":"311","rvnm":"乌江","stcd":"60803000","stnm":"武隆","tm":1664485200000,"wptn":"4","z":"168.960"},{"q":"6900","rvnm":"长江","stcd":"60107300","stnm":"宜昌","tm":1664485200000,"wptn":"5","z":"39.790"},{"q":"7140","rvnm":"长江","stcd":"60108300","stnm":"沙市","tm":1664485200000,"wptn":"5","z":"29.740"},{"rvnm":"长江","stcd":"60111200","stnm":"城陵矶(莲)","tm":1664485200000,"wptn":"6","z":"19.390"},{"q":"9100","rvnm":"长江","stcd":"60112200","stnm":"汉口","tm":1664485200000,"wptn":"6","z":"12.700"},{"q":"9000","rvnm":"长江","stcd":"60113400","stnm":"九江","tm":1664485200000,"wptn":"6","z":"7.860"},{"q":"8040","rvnm":"长江","stcd":"60115000","stnm":"大通","tm":1664485200000,"wptn":"5","z":"4.960"},{"q":"1470","rvnm":"洞庭湖","stcd":"61512000","stnm":"城陵矶(七)","tm":1664485200000,"wptn":"6","z":"19.400"},{"q":"661","rvnm":"鄱阳湖","stcd":"62601600","stnm":"湖口","tm":1664485200000,"wptn":"4","z":"6.810"},{"rvnm":"长江","stcd":"60107000","stnm":"茅坪(二)","tm":1664485200000,"wptn":"5","z":"152.990"},{"oq":"6740","rvnm":"长江","stcd":"60106980","stnm":"三峡水库","tm":1664485200000,"wptn":"5","z":"152.990"},{"rvnm":"汉江","stcd":"61802500","stnm":"龙王庙","tm":1664485200000,"wptn":"6","z":"156.790"},{"oq":"638","q":"2100","rvnm":"汉江","stcd":"61802700","stnm":"丹江口水库","tm":1664485200000,"wptn":"6","z":"156.790"}];
+				
+				var sqHtml = "<tr><td class='tb1'><b>站名</b></td><td class='tb1'><b>时间</b></td><td class='tb1'><b>水位</b>(m)</td><td class='tb1' style='padding-bottom: 3px;'><b>流量</b>(m<sup>3</sup>/s)</td></tr>";
+				for(var i = 0; i < sssq.length; i++) {
+					var sssqTmp = sssq[i]
+					var trClass="";
+					if(i%2==0){
+						trClass="tb0";
+					}else{
+						trClass="tb1";
+					}
+					var z = "-";
+					var q = "-";
+					var oq = "-";
+					var wptnColor = "";
+					if(sssqTmp.z) {
+						z = (sssqTmp.z * 1).toFixed(2);
+					}
+					if(sssqTmp.q > 0) {
+						q = (sssqTmp.q * 1).toFixed(0);
+					}
+					if(sssqTmp.oq > 0) {
+						oq = (sssqTmp.oq * 1).toFixed(0);
+					}
+					if(sssqTmp.wptn == 4) {
+						// 落
+						wptnColor = '#009900';
+					} else if(sssqTmp.wptn == 5) {
+						// 涨
+						wptnColor = '#ff0000';
+					}
+					var ioqTd = '<td class="'+trClass+'">' + q + '</td>';
+					if(oq != '-') {
+						ioqTd = '<td class="'+trClass+'">' + q + '(入)<br/>' + oq + '(出)' + '</td>';
+					}
+					
+					sqHtml += '<tr><td class="'+trClass+'"><a href="#'+sssqTmp.stcd+'" >' + sssqTmp.stnm + '</a></td><td class="'+trClass+'">' + getTime(sssqTmp.tm) + '</td><td class="'+trClass+'"><font color="' + wptnColor + '">' + z + '</font></td>' + ioqTd + '</tr>';
+
+//sqHtml += '<tr><td class="'+trClass+'"><a href="#" >' + sssqTmp.stnm + '</a></td><td class="'+trClass+'">' + sssqTmp.tm + '</td><td class="'+trClass+'"><font color="' + wptnColor + '">' + z + '</font></td>' + ioqTd + '</tr>';
+				}
+$("#sssqold").html(sqHtml);
+			}
+
+			function getTime(ntime) {
+				var now = new Date(ntime);
+				var year = now.getYear();
+				var month = now.getMonth() + 1;
+				var date = now.getDate();
+				var hour = now.getHours();
+				var minute = now.getMinutes();
+				var second = now.getSeconds();
+				return PrefixInteger(date, 2) + "日 " + PrefixInteger(hour, 2) + "时"+PrefixInteger(minute, 2) + "分";;
+
+			}
+			function PrefixInteger(num, n) {
+				return(Array(n).join(0) + num).slice(-n);
+			}
+
+window.addEventListener('message',function(rs){
+    var pointdata=rs.data;
+if(pointdata=='refresh'){
+     window.location.reload();
+}else{
+console.log(pointdata);
+}
+})
+</script>
+	</body>
+
+</html>
