@@ -13,7 +13,7 @@ jobs:
       - name: Setup Ruby 2.7
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 2.7.x
+          ruby-version: 2.7
 
       - name: execute
         env:
